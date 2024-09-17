@@ -1,49 +1,34 @@
 from PIL import Image
+import numpy as np
 
-def encrypt_image(input_path, output_path, key):
-    img = Image.open(input_path)
-    pixels = img.load()
+def image_cryptor(image_path, key, mode):
+    img = Image.open(image_path)
+    img_array = np.array(img)
+    key = np.resize(key, img_array.shape)
 
-    width, height = img.size
-
-    for i in range(width):
-        for j in range(height):
-            r, g, b = pixels[i, j]
-
-            # swapping red and blue channels
-            encrypted_pixel = (b, g, r)
-
-            pixels[i, j] = encrypted_pixel
-
-    img.save(output_path)
-    print("Image encrypted successfully!")
-
-def decrypt_image(input_path, output_path, key):
-    img = Image.open(input_path)
-    pixels = img.load()
-
-    width, height = img.size
-
-    for i in range(width):
-        for j in range(height):
-            r, g, b = pixels[i, j]
-
-            # swapping red and blue channels back
-            decrypted_pixel = (b, g, r)
-
-            pixels[i, j] = decrypted_pixel
-
-    img.save(output_path)
-    print("Image decrypted successfully!")
-
- # image path
-input_image = r"C:\Users\aashis\Desktop\Internship-01\Task-02\input.jpg"
-encrypted_image = r"C:\Users\aashis\Desktop\Internship-01\Task-02\decrypted_image.jpg"
-decrypted_image = r"C:\Users\aashis\Desktop\Internship-01\Task-02\encrypted_image.jpg"
+    if mode == 'encrypt':
+        crypted_array = np.bitwise_xor(img_array, key)
+        crypted_img = Image.fromarray(crypted_array)
+        crypted_img.save("encrypted_image.png")
+        print("Image encrypted successfully.")
+    elif mode == 'decrypt':
+        decrypted_array = np.bitwise_xor(img_array, key)
+        decrypted_img = Image.fromarray(decrypted_array)
+        decrypted_img.save("decrypted_image.png")
+        print("Image decrypted successfully.")
+    else:
+        print("Invalid mode. Please choose 'encrypt' or 'decrypt'.")
 
 
-# Encrypt the image
-encrypt_image(input_image, encrypted_image, key=None)
+def main():
+    print("Image Encryption and Decryption using Pixel Manipulation")
 
-# Decrypt the image
-decrypt_image(encrypted_image, decrypted_image, key=None)
+    image_path = input("Enter Path Of Image File: ")
+    key = np.random.randint(0, 256, size=(3,), dtype=np.uint8)
+
+    image_cryptor(image_path, key, 'encrypt')
+    image_cryptor("encrypted_image.png", key, 'decrypt')
+
+
+if __name__ == "__main__":
+    main()
